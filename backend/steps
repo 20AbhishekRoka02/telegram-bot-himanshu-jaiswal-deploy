@@ -1,0 +1,27 @@
+1. Check what bot data is? -> Just a token
+2. How it collects data on /start -> User(first_name='Abhishek', id=5824018470, is_bot=False, language_code='en', last_name='Roka')
+    The attributes of User Class in Telegram:-
+    __slots__ = (
+        "added_to_attachment_menu",
+        "can_connect_to_business",
+        "can_join_groups",
+        "can_read_all_group_messages",
+        "first_name",
+        "has_main_web_app",
+        "id",
+        "is_bot",
+        "is_premium",
+        "language_code",
+        "last_name",
+        "supports_inline_queries",
+        "username",
+    )
+
+    This we will store in database.
+
+    
+3. JSON in every message
+4. How it stores the message
+5. Send Promotional message to the known user
+6. How Business Mode helps
+7. Create chat link

@@ -1,0 +1,26 @@
+services:
+  api:
+    build: ./backend
+    container_name: telegram_bot_backend
+    working_dir: /app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+  
+  # webui:
+  #   build: ./frontend
+  #   container_name: school_erp_webui
+  #   depends_on:
+  #     - api
+  #   working_dir: /app
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./frontend:/app
+  #   command: /bin/bash
+  #   stdin_open: true
+  #   tty: true
