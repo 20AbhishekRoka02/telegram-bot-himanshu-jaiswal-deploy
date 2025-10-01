@@ -18,6 +18,11 @@ def createLead(engine: Session, lead: Lead):
 def get_lead_by_chat_id(engine: Session, chat_id):
     statement = select(Lead).where(Lead.chat_id==str(chat_id))
     return { "user": engine.exec(statement = statement).first()}
+
+# Get Admin by chat_id
+def get_admin_by_chat_id(engine: Session, chat_id):
+    statement = select(Admin).where(Admin.chat_id==str(chat_id))
+    return engine.exec(statement = statement).first()
     
 
 # Get all leads

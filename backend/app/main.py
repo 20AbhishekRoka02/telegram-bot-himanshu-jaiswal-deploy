@@ -131,6 +131,7 @@ def remove_job_if_exists(name: str, context: ContextTypes.DEFAULT_TYPE) -> bool:
 
 
 # to set schedule
+from datetime import timedelta
 async def set_timer(app) -> None:
     """Add a job to the queue."""
    
@@ -141,11 +142,11 @@ async def set_timer(app) -> None:
     for lead in leads:
         try:
             # args[0] should contain the time for the timer in seconds
-            due = float(10)
-            if due < 0:
-                # await update.effective_message.reply_text("Sorry we can not go back to future!")
-                logger.warning("due < 0")
-                return
+            due = timedelta(minutes=5)
+            # if due < 0:
+            #     # await update.effective_message.reply_text("Sorry we can not go back to future!")
+            #     logger.warning("due < 0")
+            #     return
 
             
             job_queue = app.job_queue
@@ -160,31 +161,39 @@ async def set_timer(app) -> None:
 
 
 async def sending_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    
     db = next(get_session())
-    leads = getLeads(engine=db)
+    user_id = update.effective_chat.id
+    if get_admin_by_chat_id(engine=db, chat_id=user_id):
+        await context.bot.send_message(chat_id=user_id, text="YOU ARE ADMIN!")
+        return
+    await context.bot.send_message(chat_id=user_id, text="WELCOME!")
     
-    for lead in leads:
-        await context.bot.send_media_group(
-        chat_id=update.effective_chat.id,
-        media=[ InputMediaPhoto(media=open("app/images/1746050.jpg", mode="rb"), 
-        caption="""
-Hi, <user>!
-*Lorem ipsum* dolor sit amet _consectetur_ adipiscing elit quisque faucibus ex sapien vitae pellentesque sem placerat in id cursus mi pretium tellus duis convallis tempus leo eu aenean sed diam urna tempor pulvinar vivamus fringilla lacus nec metus bibendum egestas iaculis massa nisl malesuada lacinia integer nunc posuere ut hendrerit.
+    
+    # leads = getLeads(engine=db)
+    
+    
+#     for lead in leads:
+#         await context.bot.send_media_group(
+#         chat_id=update.effective_chat.id,
+#         media=[ InputMediaPhoto(media=open("app/images/1746050.jpg", mode="rb"), 
+#         caption="""
+# Hi, <user>!
+# *Lorem ipsum* dolor sit amet _consectetur_ adipiscing elit quisque faucibus ex sapien vitae pellentesque sem placerat in id cursus mi pretium tellus duis convallis tempus leo eu aenean sed diam urna tempor pulvinar vivamus fringilla lacus nec metus bibendum egestas iaculis massa nisl malesuada lacinia integer nunc posuere ut hendrerit.
 
-https://t.me/+DXEFtPl4rT1kMTdl
+# https://t.me/+DXEFtPl4rT1kMTdl
 
-Once in a life time offer!
-https://t.me/+DXEFtPl4rT1kMTdl
-""".replace("<user>", " ".join([lead['first_name'], lead['last_name']])), parse_mode="Markdown")]
-        )
+# Once in a life time offer!
+# https://t.me/+DXEFtPl4rT1kMTdl
+# """.replace("<user>", " ".join([lead['first_name'], lead['last_name']])), parse_mode="Markdown")]
+#         )
     
 
 if __name__ == '__main__':
     application = ApplicationBuilder().token(os.environ['TOKEN']).post_init(set_timer).build()
+    # application = ApplicationBuilder().token(os.environ['TOKEN']).build()    
     
     application.add_handler(CommandHandler("start", start))
-    # application.add_handler(CommandHandler("media", sending_media))
+    application.add_handler(CommandHandler("media", sending_media))
     application.add_handler(CommandHandler("cancel", cancel))
     application.run_polling(allowed_updates=Update.ALL_TYPES)
     

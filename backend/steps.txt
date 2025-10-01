@@ -32,4 +32,4 @@
     -> Got: telegram.error.BadRequest: Chat not found
         2 solutions:-
             1. keep the table of records at admin dashboard
-            2. message the admin, about issue.
+            2. message the admin, about issue. -> how about admin user based authorization
