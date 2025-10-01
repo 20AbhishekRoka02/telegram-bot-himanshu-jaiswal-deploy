@@ -1,7 +1,31 @@
 services:
+  db:
+    image: mariadb:latest
+    container_name: leads_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: leads
+      MYSQL_USER: mysql
+      MYSQL_PASSWORD: mysql
+    volumes:
+      - ./backend/db_volume:/var/lib/mysql
+    ports:
+      - "3306:3306"
+  
+  adminer:
+    image: adminer:latest
+    container_name: leads_adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
   api:
     build: ./backend
     container_name: telegram_bot_backend
+    depends_on:
+      - db
     working_dir: /app
     ports:
       - "8000:8000"

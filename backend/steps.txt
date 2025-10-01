@@ -25,3 +25,11 @@
 5. Send Promotional message to the known user
 6. How Business Mode helps
 7. Create chat link
+
+
+0. send messages and how many users
+1. Check if new bot can send message too to the users
+    -> Got: telegram.error.BadRequest: Chat not found
+        2 solutions:-
+            1. keep the table of records at admin dashboard
+            2. message the admin, about issue.
