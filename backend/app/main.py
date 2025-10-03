@@ -142,7 +142,7 @@ async def set_timer(app) -> None:
     for lead in leads:
         try:
             # args[0] should contain the time for the timer in seconds
-            due = timedelta(minutes=5)
+            due = timedelta(seconds=10)
             # if due < 0:
             #     # await update.effective_message.reply_text("Sorry we can not go back to future!")
             #     logger.warning("due < 0")
