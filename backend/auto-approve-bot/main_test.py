@@ -1,8 +1,9 @@
+import asyncio
 import logging
 import os
 import json
 from dotenv import load_dotenv
-from telegram import Update, ChatMember
+from telegram import Update, ChatMember, InputMediaPhoto
 from telegram.ext import (
     ApplicationBuilder,
     MessageHandler,
@@ -19,6 +20,9 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
+
+# Global queue
+# message_queue = asyncio.Queue()
 
 # set higher logging level for httpx to avoid all GET and POST requests being logged
 logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -58,8 +62,28 @@ def get_session():
     with Session(engine) as session:
         yield session
         
-        
-        
+
+# Function to send all messages to a single user with delay
+async def send_messages_to_user(bot, user_id, messages):
+    for msg in messages["data"]:
+        try:
+            if msg["type"] == "photo":
+                with open(msg["media"], "rb") as f:
+                    await bot.send_media_group(
+                        chat_id=user_id,
+                        media=[InputMediaPhoto(
+                            media=f,
+                            caption=msg["caption"],
+                            parse_mode="MarkdownV2"
+                        )]
+                    )
+            # wait 1 minute before next message
+            await asyncio.sleep(float(os.environ['DELAY']))
+        except Exception as e:
+            logger.error(f"Error sending message to {user_id}: {e}")
+
+
+
 # --- Helper functions ---
 def save_message(message_name, chat_id, message_id):
     with open(DATA_FILE, "r") as f:
@@ -96,15 +120,16 @@ async def addmsg_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # --- Capture the message from user ---
 async def capture_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.message
+    # print("Message is: ", message)
     user_id = message.from_user.id
 
     # Use a unique message name
     logger.info(f"Created unique message name: usermsg_{user_id}_{message.message_id}")
     message_name = f"usermsg_{user_id}_{message.message_id}"
-    print("message: ", message.text)
+    # print("message: ", message.text)
 
     logger.info("Saving to message file.")
-    save_message(message_name, message.chat_id, message.message_id)
+    # save_message(message_name, message.chat_id, message.message_id)
     await update.message.reply_text("Your message has been saved ✅")
     logger.info("Message saved!")
     return ConversationHandler.END
@@ -137,24 +162,38 @@ async def handle_join_request(update: Update, context: ContextTypes.DEFAULT_TYPE
         print(f"Error approving user {user_id}: {e}")
         return
 
-    # Forward stored messages to the user
-    # stored_messages = load_messages()
-    # for msg in stored_messages["data"]:
-    #     name = list(msg.keys())[0]
+    # Sending stored messages to the user
+    stored_messages = load_messages()
+    
+    # for msg in stored_messages["data"]:  
     #     try:
-    #         await context.bot.forward_message(
-    #             chat_id=user_id,
-    #             from_chat_id=msg[name]['chat_id'],
-    #             message_id=msg[name]['message_id']
-    #         )
-    #         print(f"Forwarded {name} to user {user_id}")
-    #         logger.info(f"Forwarded {name} to user {user_id}")
+    #         if msg["type"] == "photo":
+    #             await context.bot.send_media_group(
+    #                 chat_id=user_id,
+    #                 media = [
+    #                     InputMediaPhoto(
+    #                         media=open(msg["media"], mode="rb"),
+    #                         caption=msg["caption"],
+    #                         parse_mode="MarkdownV2"
+    #                     )
+    #                 ]
+    #             )
+    #         print(f"Sent message to {user.first_name} {user.last_name} {user_id}")
+    #         logger.info(f"Sent message to {user.first_name} {user.last_name} {user_id}")
             
     #     except Exception as e:
-    #         print(f"Error forwarding {name} to user {user_id}: {e}")
-    #         logger.error(f"Error forwarding {name} to user {user_id}: {e}")
+    #         print(f"Error while sending the media: {e}")
+    #         logger.error(f"Error while sending the media: {e}")
     
-    await context.bot.send_message(chat_id=user_id, text="Welcome to the Channel!")
+    try:
+        # Start a separate task for this user
+        asyncio.create_task(send_messages_to_user(context.bot, user_id, stored_messages))
+
+    except Exception as e:
+        print(f"Error while sending the media: {e}")
+        logger.error(f"Error while sending the media: {e}")
+    
+    # await context.bot.send_message(chat_id=user_id, text="Welcome to the Channel!")
             
     # Save Leads to DB
     logger.info("Saving Leads to DB.")
@@ -179,7 +218,32 @@ async def handle_join_request(update: Update, context: ContextTypes.DEFAULT_TYPE
         logger.error(f"Error occured: {e}, handled.")
         # logger.exception(e)
 
-
+# test send
+async def send_sample(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Sending stored messages to the user
+    stored_messages = load_messages()
+    
+    for msg in stored_messages["data"]:
+        
+        try:
+            if msg["type"] == "photo":
+                await context.bot.send_media_group(
+                    chat_id=os.environ['BOT_OWNER_ID'],
+                    media = [
+                        InputMediaPhoto(
+                            media=open(msg["media"], mode="rb"),
+                            caption=msg["caption"],
+                    parse_mode="MarkdownV2"
+                        )
+                    ],
+                )   
+            # print(f"Sent message to {user.first_name} {user.last_name} {user_id}")
+            # logger.info(f"Sent message to {user.first_name} {user.last_name} {user_id}")
+            
+        except Exception as e:
+            print(f"Error while sending the media: {e}")
+            logger.error(f"Error while sending the media: {e}")
+            
 # --- Handler for users leaving ---
 async def farewell_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_member = update.chat_member
@@ -191,7 +255,7 @@ async def farewell_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if old_status in [ChatMember.MEMBER, ChatMember.RESTRICTED] and new_status in [ChatMember.LEFT, ChatMember.BANNED]:
         # Send farewell message directly to user
         try:
-            await context.bot.forward_message(
+            await context.bot.send_message(
                 chat_id=user.id,
                 text=f"Goodbye! We're sad to see you leave the channel."
             )
@@ -215,24 +279,31 @@ async def farewell_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # --- Main ---
 app = ApplicationBuilder().token(TOKEN).build()
 
+# Start multiple workers (say 10-20)
+# for _ in range(20):
+#     asyncio.create_task(message_worker(app.bot))
+    
+    
 # Conversation handler for /addmsg
-conv_handler = ConversationHandler(
-    entry_points=[CommandHandler("addmsg", addmsg_command)],
-    states={
-        WAITING_FOR_MESSAGE: [
-            MessageHandler(
-                filters.TEXT & (~filters.Command(["/cancel"])) | filters.Sticker.ALL | filters.PHOTO | filters.ATTACHMENT | filters.ANIMATION,
-                capture_message
-            ),
+# conv_handler = ConversationHandler(
+#     entry_points=[CommandHandler("addmsg", addmsg_command)],
+#     states={
+#         WAITING_FOR_MESSAGE: [
+#             MessageHandler(
+#                 filters.TEXT & (~filters.Command(["/cancel"])) | filters.Sticker.ALL | filters.PHOTO | filters.ATTACHMENT | filters.ANIMATION,
+#                 capture_message
+#             ),
             
-        ]
-    },
-    fallbacks=[CommandHandler("cancel", cancel)]
-)
-app.add_handler(conv_handler)
+#         ]
+#     },
+#     fallbacks=[CommandHandler("cancel", cancel)]
+# )
+# app.add_handler(conv_handler)
 
 # Handle join requests in the private channel
 app.add_handler(ChatJoinRequestHandler(handle_join_request))
+
+app.add_handler(CommandHandler("send", send_sample))
 
 # Farewell user
 app.add_handler(ChatMemberHandler(farewell_members, ChatMemberHandler.CHAT_MEMBER))

@@ -1,28 +1,24 @@
 {
-    "data": [
-        {
-            "usermsg_5824018470_360": {
-                "chat_id": 5824018470,
-                "message_id": 360
-            }
-        },
-        {
-            "usermsg_5824018470_364": {
-                "chat_id": 5824018470,
-                "message_id": 364
-            }
-        },
-        {
-            "usermsg_5824018470_368": {
-                "chat_id": 5824018470,
-                "message_id": 368
-            }
-        },
-        {
-            "usermsg_5824018470_372": {
-                "chat_id": 5824018470,
-                "message_id": 372
-            }
-        }
-    ]
+  "data": [
+    {
+      "type": "photo",
+      "media": "./media/images/1.jpg",
+      "caption": "Your **FREE VIP** Group Is Here 👇\n\nhttps://t\\.me/\\+Tu1VsrDDUUc4MzFl\nhttps://t\\.me/\\+Tu1VsrDDUUc4MzFl"
+    },
+    {
+      "type": "photo",
+      "media": "./media/images/2.jpg",
+      "caption": "**__Oldest Japanese Channel__**\nhttps://t\\.me/\\+UURM1ObHQBtlZWM1\n\n✅ Daily free signals\\.\n✅ 100% Trust worthy\\.\n✅ Best for new traders\n✅ 38,000\\+ students trained\\.\n✅ Live market guidance to make money\\.\n\nhttps://t\\.me/\\+UURM1ObHQBtlZWM1"
+    },
+    {
+      "type": "photo",
+      "media": "./media/images/3.jpg",
+      "caption": "💎 **Join to Claim 1 Free TON** 💎\n\nhttps://t\\.me/\\+nNTtYIxGnyZhY2Zl\nhttps://t\\.me/\\+nNTtYIxGnyZhY2Zl\n\n🤑 **__100% Guranteed Free Ton__** 🤑"
+    },
+    {
+      "type": "photo",
+      "media": "./media/images/4.jpg",
+      "caption": "🚨 **__Free Technical Analysis Classes__** 🚨\nhttps://t\\.me/\\+qBwYXG\\_\\-\\-EE0NWY1\n\n📊 **Learn Technical Analysis For Free**\nhttps://t\\.me/\\+qBwYXG\\_\\-\\-EE0NWY1\n\n🕯 **Change Your Bloodline Days For Free**\nhttps://t\\.me/\\+qBwYXG\\_\\-\\-EE0NWY1"
+    }
+  ]
 }

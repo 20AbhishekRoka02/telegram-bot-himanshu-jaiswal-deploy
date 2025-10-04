@@ -5,11 +5,11 @@ from sqlmodel import select, Session
 def createLead(engine: Session, lead: Lead):
     db_user = Lead(
         chat_id = lead.id,
-        first_name = lead.first_name,
-        last_name = lead.last_name,
+        first_name = str(lead.first_name),
+        last_name = str(lead.last_name),
         username = str(lead.username),
         is_premium= str(lead.is_premium),
-        language_code = lead.language_code
+        language_code = str(lead.language_code)
     )
     
     engine.add(db_user)
