@@ -11,6 +11,7 @@ from datetime import datetime
 
 # User model
 class Lead(SQLModel, table=True):
+    __tablename__="leads"
     chat_id: str = Field(primary_key=True)
     first_name: str
     last_name: str
