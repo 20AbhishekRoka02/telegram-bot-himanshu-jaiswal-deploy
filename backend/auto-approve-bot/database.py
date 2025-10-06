@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 
-DATABASE_URL=f"mysql+pymysql://{os.environ['MYSQL_USER']}:{os.environ['MYSQL_PASSWORD']}@{os.environ['CONTAINER_NAME']}:{os.environ['DB_PORT']}/{os.environ['MYSQL_DATABASE']}"
+# DATABASE_URL=f"mysql+pymysql://{os.environ['MYSQL_USER']}:{os.environ['MYSQL_PASSWORD']}@{os.environ['CONTAINER_NAME']}:{os.environ['DB_PORT']}/{os.environ['MYSQL_DATABASE']}"
+DATABASE_URL=os.environ['DATABASE_URL']
 
 
 # sqlite_file_name = "schoolerp.db"
