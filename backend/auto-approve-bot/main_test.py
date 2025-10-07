@@ -65,7 +65,7 @@ def get_session():
     with Session(engine) as session:
         yield session
         
-
+from time import time
 # Function to send all messages to a single user with delay
 async def send_messages_to_user(bot, user_id, messages):
     for msg in messages["data"]:
@@ -81,7 +81,9 @@ async def send_messages_to_user(bot, user_id, messages):
                         )]
                     )
             # wait 1 minute before next message
-            await asyncio.sleep(float(os.environ['DELAY']))
+            # await asyncio.sleep(float(os.environ['DELAY']))
+            await asyncio.sleep(int( 60 - (time() % 60)))
+        
         except Exception as e:
             logger.error(f"Error sending message to {user_id}: {e}")
 
