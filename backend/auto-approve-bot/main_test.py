@@ -15,6 +15,9 @@ from telegram.ext import (
     ChatMemberHandler
 )
 
+# Importing Parse Mode
+from telegram.constants import ParseMode
+
 # Setup Logging functionality
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -74,7 +77,7 @@ async def send_messages_to_user(bot, user_id, messages):
                         media=[InputMediaPhoto(
                             media=f,
                             caption=msg["caption"],
-                            parse_mode="MarkdownV2"
+                            parse_mode=ParseMode.MARKDOWN_V2
                         )]
                     )
             # wait 1 minute before next message
@@ -233,7 +236,7 @@ async def send_sample(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         InputMediaPhoto(
                             media=open(msg["media"], mode="rb"),
                             caption=msg["caption"],
-                    parse_mode="MarkdownV2"
+                    parse_mode=ParseMode.MARKDOWN_V2
                         )
                     ],
                 )   
@@ -303,7 +306,7 @@ app = ApplicationBuilder().token(TOKEN).build()
 # Handle join requests in the private channel
 app.add_handler(ChatJoinRequestHandler(handle_join_request))
 
-app.add_handler(CommandHandler("send", send_sample))
+#app.add_handler(CommandHandler("send", send_sample))
 
 # Farewell user
 app.add_handler(ChatMemberHandler(farewell_members, ChatMemberHandler.CHAT_MEMBER))
