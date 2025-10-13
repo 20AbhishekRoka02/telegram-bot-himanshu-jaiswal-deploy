@@ -68,17 +68,31 @@ def get_session():
 from time import time
 # Function to send all messages to a single user with delay
 async def send_messages_to_user(bot, user_id, messages):
+    keyboard = [ ["🔥 CLAIM YOUR FREE VIP 🔥"] ]
+
+    reply_markup = ReplyKeyboardMarkup(
+        keyboard,
+        resize_keyboard=True
+    )
+    
     for msg in messages["data"]:
         try:
             if msg["type"] == "photo":
                 with open(msg["media"], "rb") as f:
-                    await bot.send_media_group(
+                    # await bot.send_media_group(
+                    #     chat_id=user_id,
+                    #     media=[InputMediaPhoto(
+                    #         media=f,
+                    #         caption=msg["caption"],
+                    #         parse_mode=ParseMode.MARKDOWN_V2
+                    #     )]
+                    # )
+                    await bot.send_photo(
                         chat_id=user_id,
-                        media=[InputMediaPhoto(
-                            media=f,
-                            caption=msg["caption"],
-                            parse_mode=ParseMode.MARKDOWN_V2
-                        )]
+                        photo=f,
+                        caption=msg["caption"],
+                        parse_mode= 'MarkdownV2',
+                        reply_markup = reply_markup
                     )
             # wait 1 minute before next message
             # await asyncio.sleep(float(os.environ['DELAY']))
