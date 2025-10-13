@@ -3,7 +3,7 @@ import logging
 import os
 import json
 from dotenv import load_dotenv
-from telegram import Update, ChatMember, InputMediaPhoto
+from telegram import Update, ChatMember, InputMediaPhoto, ReplyKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
     MessageHandler,
