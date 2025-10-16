@@ -43,3 +43,63 @@ def getLeads(engine: Session):
             "last_name":result.last_name,
         })
     return output_list
+
+# Update message record
+def updateMessageRecord(engine: Session, chat_id: str, message_id: str, message: str, send_status: str, sent_time: datetime, is_seen: bool):
+    statement = select(MessageRecord).where(MessageRecord.chat_id == chat_id)
+    results = engine.exec(statement)
+    # result = results.one()
+    # print("results: ", dict(results))
+    # print(len(results))
+    
+    
+    # if result:
+    #     print("One result is: ", result)
+    # else:
+    #     print("Not there! Need to record one.")
+    
+    try:
+        result = results.one()
+        # print(result)
+        result.message_id=message_id
+        result.message=message
+        result.send_status=send_status
+        sent_time=sent_time
+        seen_time=None
+        is_seen=is_seen
+        
+        engine.add(result)
+        engine.commit()
+        engine.refresh(result)
+        return result
+        
+    except Exception as e:
+        print(e)
+        db_message = MessageRecord(
+            chat_id = chat_id,
+            message_id=message_id,
+            message=message,
+            send_status=send_status,
+            sent_time=sent_time,
+            seen_time=None,
+            is_seen=False
+        )
+    
+        engine.add(db_message)
+        engine.commit()
+        engine.refresh(db_message)
+        return db_message
+        
+        
+def updateMessageSeenRecord(engine: Session, chat_id: str, seen_time: datetime, is_seen: bool):
+    statement = select(MessageRecord).where(MessageRecord.chat_id == chat_id)
+    results = engine.exec(statement)
+    result = results.one()
+    
+    result.seen_time = seen_time
+    result.is_seen = is_seen
+    
+    engine.add(result)
+    engine.commit()
+    engine.refresh(result)
+    return result

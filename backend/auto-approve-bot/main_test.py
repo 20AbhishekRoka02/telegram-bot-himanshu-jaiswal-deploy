@@ -87,19 +87,25 @@ async def send_messages_to_user(bot, user_id, messages):
                     #         parse_mode=ParseMode.MARKDOWN_V2
                     #     )]
                     # )
-                    await bot.send_photo(
+                    message_sent = await bot.send_photo(
                         chat_id=user_id,
                         photo=f,
                         caption=msg["caption"],
                         parse_mode= 'MarkdownV2',
                         reply_markup = reply_markup
                     )
+                    
+                db = next(get_session())
+                updateMessageRecord(engine=db, chat_id=user_id, message_id=str(message_sent.message_id), message=json.dumps(msg), send_status="Sent", sent_time=message_sent.date, is_seen=False)
             # wait 1 minute before next message
             # await asyncio.sleep(float(os.environ['DELAY']))
             await asyncio.sleep(int( 60 - (time() % 60)))
         
         except Exception as e:
             logger.error(f"Error sending message to {user_id}: {e}")
+            db = next(get_session())
+            updateMessageRecord(engine=db, chat_id=user_id, message_id=str(None), message=json.dumps(msg), send_status="Not sent",sent_time=datetime.now(),  is_seen=False)
+
 
 
 
@@ -153,6 +159,27 @@ async def capture_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info("Message saved!")
     return ConversationHandler.END
 
+
+# handle normal text messages (including keyboard clicks)
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = update.message.text  # 🟢 this is what user clicked
+    
+    
+    if text == "🔥 CLAIM YOUR FREE VIP 🔥":
+        db = next(get_session())
+        chat_id=update.effective_chat.id
+        
+        try:
+            updateMessageSeenRecord(
+            engine=db,
+            chat_id=chat_id,
+            seen_time=datetime.now(),
+            is_seen=True   
+        )
+        except Exception as e:
+            logger.error("Error occured: ", e)
+        
+        
 # --- Cancel command ---
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info("Cancelling an operation...")
@@ -326,6 +353,9 @@ app.add_handler(ChatJoinRequestHandler(handle_join_request))
 
 # Farewell user
 app.add_handler(ChatMemberHandler(farewell_members, ChatMemberHandler.CHAT_MEMBER))
+
+# handle message
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
 print("Bot running... Use /addmsg to store user messages + wait for join requests.")
 logger.info("Bot running... Use /addmsg to store user messages + wait for join requests.")
